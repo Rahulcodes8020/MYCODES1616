@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Headquarters Surveillance GUI</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background-color: #001900;
+      overflow: hidden;
+      font-family: monospace;
+      color: #0f0;
+    }
+
+    .border {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      box-sizing: border-box;
+      border: 5px solid #0f0;
+      animation: pulseBorder 2s infinite alternate;
+      z-index: 1;
+    }
+
+    @keyframes pulseBorder {
+      0% { border-color: #0f0; }
+      100% { border-color: #ff0; }
+    }
+
+    .radar {
+      width: 100vw;
+      height: 100vh;
+      background: radial-gradient(circle, #000033 0%, #001900 100%);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .radar::before, .radar::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      transform: translate(-50%, -50%);
+      border: 2px solid #00f;
+      border-radius: 50%;
+      animation: radarPulse 4s infinite ease-out;
+      z-index: 0;
+    }
+
+    .radar::after {
+      animation-delay: 2s;
+    }
+
+    @keyframes radarPulse {
+      0% { width: 0; height: 0; opacity: 1; }
+      100% { width: 600px; height: 600px; opacity: 0; }
+    }
+
+    .sweeper {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 300px;
+      height: 2px;
+      background: rgba(0, 0, 255, 0.8);
+      transform-origin: left center;
+      animation: rotateRadar 5s linear infinite;
+      z-index: 2;
+    }
+
+    @keyframes rotateRadar {
+      from { transform: rotate(0deg) translateX(-50%) rotate(0deg); }
+      to { transform: rotate(360deg) translateX(-50%) rotate(-360deg); }
+    }
+
+    .grid {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-image:
+        linear-gradient(to right, rgba(0,255,0,0.1) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0,255,0,0.1) 1px, transparent 1px);
+      background-size: 50px 50px;
+      z-index: 0;
+    }
+
+    .chart-panel {
+      position: absolute;
+      right: 20px;
+      top: 20px;
+      width: 200px;
+      height: 200px;
+      background: rgba(0, 50, 0, 0.6);
+      border: 1px solid #0f0;
+      padding: 10px;
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      gap: 4px;
+    }
+
+    .bar {
+      height: 12px;
+      background: #0f0;
+      animation: growBar 2s infinite ease-in-out alternate;
+      transform-origin: left;
+    }
+
+    .bar:nth-child(2) { animation-delay: 0.2s; width: 50%; }
+    .bar:nth-child(3) { animation-delay: 0.4s; width: 70%; }
+    .bar:nth-child(4) { animation-delay: 0.6s; width: 40%; }
+    .bar:nth-child(5) { animation-delay: 0.8s; width: 90%; }
+
+    @keyframes growBar {
+      0% { transform: scaleX(0.5); }
+      100% { transform: scaleX(1); }
+    }
+
+    .chart-title {
+      text-align: center;
+      font-size: 14px;
+      margin-bottom: 8px;
+      border-bottom: 1px dashed #0f0;
+      padding-bottom: 4px;
+    }
+
+    .gui-panel {
+      position: absolute;
+      left: 20px;
+      top: 20px;
+      width: 250px;
+      height: 250px;
+      background: rgba(0, 40, 0, 0.7);
+      border: 1px solid #0f0;
+      padding: 10px;
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .gui-panel h3 {
+      margin: 0;
+      font-size: 16px;
+      border-bottom: 1px solid #0f0;
+      padding-bottom: 5px;
+    }
+
+    .status {
+      font-size: 13px;
+      margin-top: 10px;
+    }
+
+    .status span {
+      color: #ff0;
+    }
+
+    .log {
+      margin-top: 10px;
+      font-size: 12px;
+      height: 100px;
+      overflow: hidden;
+    }
+
+    .log-entry {
+      border-left: 2px solid #0f0;
+      padding-left: 8px;
+      white-space: nowrap;
+      animation: scrollLog 8s linear infinite alternate;
+    }
+
+    @keyframes scrollLog {
+      0% { opacity: 0.2; transform: translateY(10px); }
+      50% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0.2; transform: translateY(-10px); }
+    }
+
+    /* Password Cracker */
+    .password-cracker {
+      position: absolute;
+      left: 20px;
+      bottom: 20px;
+      width: 300px;
+      height: 250px;
+      background: rgba(0, 0, 50, 0.8);
+      border: 1px solid #00f;
+      padding: 10px;
+      z-index: 4;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .password-cracker h3 {
+      font-size: 16px;
+      margin: 0;
+      border-bottom: 1px solid #00f;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 10px;
+      background: #333;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .progress {
+      height: 100%;
+      background: #00f;
+      animation: progressAnimation 5s linear infinite;
+    }
+
+    @keyframes progressAnimation {
+      0% { width: 0%; }
+      100% { width: 100%; }
+    }
+
+    .console {
+      margin-top: 10px;
+      font-size: 12px;
+      height: 140px;
+      overflow: hidden;
+    }
+
+    .console p {
+      border-left: 2px solid #00f;
+      padding-left: 8px;
+      white-space: nowrap;
+      animation: scrollConsole 6s linear infinite alternate;
+    }
+
+    @keyframes scrollConsole {
+      0% { opacity: 0.2; transform: translateY(10px); }
+      50% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0.2; transform: translateY(-10px); }
+    }
+
+    /* Remote Terminal */
+    .remote-terminal {
+      position: absolute;
+      right: 20px;
+      bottom: 20px;
+      width: 300px;
+      height: 250px;
+      background: rgba(0, 0, 50, 0.8);
+      border: 1px solid #00f;
+      padding: 10px;
+      z-index: 4;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .remote-terminal h3 {
+      font-size: 16px;
+      margin: 0;
+      border-bottom: 1px solid #00f;
+    }
+
+    .terminal {
+      margin-top: 10px;
+      font-size: 12px;
+      height: 200px;
+      overflow: hidden;
+    }
+
+    .terminal p {
+      border-left: 2px solid #00f;
+      padding-left: 8px;
+      white-space: nowrap;
+      animation: scrollTerminal 8s linear infinite alternate;
+    }
+
+    @keyframes scrollTerminal {
+      0% { opacity: 0.2; transform: translateY(10px); }
+      50% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0.2; transform: translateY(-10px); }
+    }
+  </style>
+</head>
+<body>
+  <div class="border"></div>
+  <div class="radar">
+    <div class="grid"></div>
+    <div class="sweeper"></div>
+
+    <!-- HQ Panel -->
+    <div class="gui-panel">
+      <h3>HQ SURVEILLANCE</h3>
+      <div class="status">Status: <span>ACTIVE</span></div>
+      <div class="status">Targets Detected: <span>03</span></div>
+      <div class="status">Last Scan: <span>02:14:57</span></div>
+      <div class="log">
+        <div class="log-entry">[02:14:43] - Scanning Sector B2</div>
+        <div class="log-entry">[02:14:47] - Object Detected: 43.7N, 18.3E</div>
+        <div class="log-entry">[02:14:51] - Signal Acquired</div>
+        <div class="log-entry">[02:14:57] - Update Complete</div>
+      </div>
+    </div>
+
+    <!-- Live Chart -->
+    <div class="chart-panel">
+      <div class="chart-title">LIVE SYSTEM DATA</div>
+      <div class="bar" style="width: 80%;"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+    </div>
+
+    <!-- Password Cracker -->
+    <div class="password-cracker">
+      <h3>Password Cracker</h3>
+      <div class="status">Status: <span>Cracking...</span></div>
+      <div class="progress-bar">
+        <div class="progress"></div>
+      </div>
+      <div class="console">
+        <p>Initializing...</p>
+        <p>Attempting: admin123</p>
+        <p>Attempting: letmein</p>
+        <p>Attempting: qwerty</p>
+        <p>Access Denied</p>
+      </div>
+    </div>
+
+    <!-- Remote Terminal -->
+    <div class="remote-terminal">
+      <h3>Remote Terminal</h3>
+      <div class="terminal">
+        <p>Connecting to 192.168.1.1...</p>
+        <p>Login: admin</p>
+        <p>Password: ********</p>
+        <p>Access Granted</p>
+        <p>Last login: Fri May 09 11:45:47 2025</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

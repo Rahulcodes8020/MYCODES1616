@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Govt. of India - MOC Drill Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+      color: white;
+    }
+
+    header {
+      background: #003366;
+      padding: 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 28px;
+      color: #00ffff;
+    }
+
+    .login-container {
+      max-width: 400px;
+      margin: 30px auto;
+      background: #001f3f;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #00ffff50;
+    }
+
+    .login-container h2 {
+      text-align: center;
+      color: #00ffff;
+    }
+
+    .login-container input {
+      width: 100%;
+      margin: 10px 0;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+    }
+
+    .login-container button {
+      width: 100%;
+      padding: 12px;
+      background: #00ffff;
+      color: #003366;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .dashboard {
+      display: none;
+      padding: 20px;
+      animation: fadeIn 2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .section {
+      margin-bottom: 40px;
+    }
+
+    .section h3 {
+      color: #00ffff;
+      margin-bottom: 10px;
+    }
+
+    .graphics {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+    }
+
+    .aircraft-img {
+      width: 100%;
+      max-width: 400px;
+      animation: flyIn 3s ease-in-out;
+    }
+
+    @keyframes flyIn {
+      from { transform: translateX(-200px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    canvas {
+      max-width: 100%;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      background: #001f3f;
+      color: #ccc;
+    }
+
+    @media(max-width: 600px) {
+      .graphics {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Government of India | MOC Drill Info Portal</h1>
+  </header>
+
+  <div class="login-container" id="loginBox">
+    <h2>Login</h2>
+    <input type="text" id="username" placeholder="Username"/>
+    <input type="password" id="password" placeholder="Password"/>
+    <button onclick="login()">Login</button>
+  </div>
+
+  <div class="dashboard" id="dashboard">
+    <div class="section">
+      <h3>About the MOC Drill</h3>
+      <p>
+        The Mock Operational Coordination (MOC) drill is conducted to simulate emergency response protocols across air and land defense. The animation below illustrates an aerial sweep and aircraft involvement during the drill.
+      </p>
+    </div>
+
+    <div class="section graphics">
+      <img src="https://cdn.pixabay.com/photo/2012/04/13/17/00/airplane-32410_1280.png" alt="Aircraft" class="aircraft-img" />
+      <canvas id="aircraftChart" width="300" height="300"></canvas>
+    </div>
+
+    <div class="section">
+      <h3>Live Drill Progress (Simulated)</h3>
+      <canvas id="liveDrillChart" height="150"></canvas>
+    </div>
+  </div>
+
+  <footer>
+    &copy; 2025 Govt. of India | All Rights Reserved.
+  </footer>
+
+  <script>
+    function login() {
+      const user = document.getElementById("username").value;
+      const pass = document.getElementById("password").value;
+      if (user && pass) {
+        document.getElementById("loginBox").style.display = "none";
+        document.getElementById("dashboard").style.display = "block";
+        drawCharts();
+      } else {
+        alert("Please enter valid credentials.");
+      }
+    }
+
+    function drawCharts() {
+      
+      new Chart(document.getElementById('aircraftChart').getContext('2d'), {
+        type: 'pie',
+        data: {
+          labels: ['Fighter Jets', 'Helicopters', 'Cargo Planes', 'Drones'],
+          datasets: [{
+            data: [30, 20, 10, 15],
+            backgroundColor: ['#ff6384', '#36a2eb', '#ffce56', '#4bc0c0']
+          }]
+        }
+      });
+
+      
+      const ctx = document.getElementById('liveDrillChart').getContext('2d');
+      const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [{
+            label: 'Drill Status Index',
+            data: [],
+            borderColor: '#00ffff',
+            fill: false
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+
+      setInterval(() => {
+        const time = new Date().toLocaleTimeString();
+        const value = Math.floor(Math.random() * 100);
+        chart.data.labels.push(time);
+        chart.data.datasets[0].data.push(value);
+        if (chart.data.labels.length > 10) {
+          chart.data.labels.shift();
+          chart.data.datasets[0].data.shift();
+        }
+        chart.update();
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
